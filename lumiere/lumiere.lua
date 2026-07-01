@@ -12,7 +12,7 @@ local lumiere = {
 	effects = {},
 	predicate = nil,
 	timestamp = 0,
-	clear_options = {[graphics.BUFFER_TYPE_COLOR0_BIT] = clear_color, [graphics.BUFFER_TYPE_DEPTH_BIT] = 1}
+	clear_options = { [graphics.BUFFER_TYPE_COLOR0_BIT] = clear_color, [graphics.BUFFER_TYPE_DEPTH_BIT] = 1 }
 }
 
 function M.time()
@@ -32,7 +32,6 @@ function M.set_identity()
 	render.set_projection(IDENTITY)
 end
 
-
 local function create_render_targets(width, height)
 	if lumiere.rt1 then
 		render.delete_render_target(lumiere.rt1)
@@ -40,28 +39,38 @@ local function create_render_targets(width, height)
 	if lumiere.rt2 then
 		render.delete_render_target(lumiere.rt2)
 	end
-		
-	local color_params = { format = graphics.TEXTURE_FORMAT_RGBA,
+
+	local color_params = {
+		format = graphics.TEXTURE_FORMAT_RGBA,
 		width = width,
 		height = height,
 		min_filter = graphics.TEXTURE_FILTER_LINEAR,
 		mag_filter = graphics.TEXTURE_FILTER_LINEAR,
 		u_wrap = graphics.TEXTURE_WRAP_CLAMP_TO_EDGE,
-		v_wrap = graphics.TEXTURE_WRAP_CLAMP_TO_EDGE }
+		v_wrap = graphics.TEXTURE_WRAP_CLAMP_TO_EDGE
+	}
 
-	local depth_params = { format = graphics.TEXTURE_FORMAT_DEPTH,
+	local depth_params = {
+		format = graphics.TEXTURE_FORMAT_DEPTH,
 		width = width,
 		height = height,
 		u_wrap = graphics.TEXTURE_WRAP_CLAMP_TO_EDGE,
-		v_wrap = graphics.TEXTURE_WRAP_CLAMP_TO_EDGE }
+		v_wrap = graphics.TEXTURE_WRAP_CLAMP_TO_EDGE
+	}
 
-	lumiere.rt1 = render.render_target({[graphics.BUFFER_TYPE_COLOR0_BIT] = color_params, [graphics.BUFFER_TYPE_DEPTH_BIT] = depth_params })
-	lumiere.rt2 = render.render_target({[graphics.BUFFER_TYPE_COLOR0_BIT] = color_params, [graphics.BUFFER_TYPE_DEPTH_BIT] = depth_params })
+	lumiere.rt1 = render.render_target({
+		[graphics.BUFFER_TYPE_COLOR0_BIT] = color_params,
+		[graphics.BUFFER_TYPE_DEPTH_BIT] = depth_params
+	})
+	lumiere.rt2 = render.render_target({
+		[graphics.BUFFER_TYPE_COLOR0_BIT] = color_params,
+		[graphics.BUFFER_TYPE_DEPTH_BIT] = depth_params
+	})
 end
 
 local function iterate_effects(fn)
 	local count = #lumiere.effects
-	for i=1,count do
+	for i = 1, count do
 		local effect = lumiere.effects[i]
 		fn(i, effect)
 	end
@@ -84,8 +93,8 @@ function M.init()
 	assert(not lumiere.predicate, "You may only call lumiere.init() once")
 
 	lumiere.timestamp = socket.gettime()
-	
-	lumiere.predicate = render.predicate({"lumiere"})
+
+	lumiere.predicate = render.predicate({ "lumiere" })
 
 	local width = render.get_window_width()
 	local height = render.get_window_height()
@@ -103,7 +112,7 @@ function M.final()
 	assert(lumiere.predicate, "You must call lumiere.init() once before calling lumiere.final()")
 
 	clear_effects()
-	
+
 	render.delete_render_target(lumiere.rt1)
 	render.delete_render_target(lumiere.rt2)
 	lumiere.rt1 = nil
@@ -115,13 +124,13 @@ function M.update()
 	local now = socket.gettime()
 	local dt = now - lumiere.timestamp
 	lumiere.timestamp = now
-	
+
 	time.x = time.x + dt
 
 	-- detect updates to effects
 	if lumiere.new_effects then
 		clear_effects()
-		for i,effect in ipairs(lumiere.new_effects or {}) do
+		for i, effect in ipairs(lumiere.new_effects or {}) do
 			lumiere.effects[i] = {
 				effect = effect,
 				init = effect.init or function() end,
@@ -132,7 +141,7 @@ function M.update()
 			effect.init()
 		end
 		lumiere.new_effects = nil
-	end	
+	end
 
 	-- detect resolution change
 	local width = render.get_window_width()
@@ -149,7 +158,6 @@ function M.update()
 		end)
 	end
 end
-
 
 function M.draw(fn)
 	local count = #lumiere.effects
@@ -188,6 +196,9 @@ function M.draw(fn)
 	render.set_projection(IDENTITY)
 	render.draw(lumiere.predicate)
 	render.disable_texture(0)
+
+	render.set_stencil_mask(0xff)
+	render.clear({ [graphics.BUFFER_TYPE_STENCIL_BIT] = 0 })
 end
 
 function M.on_message(message_id, message, sender)
