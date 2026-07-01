@@ -174,6 +174,8 @@ function M.draw(fn)
 	local input = lumiere.rt1
 	local output = lumiere.rt2
 
+	render.disable_state(render.STATE_STENCIL_TEST)
+
 	-- draw to the first render target
 	render.set_render_target(input)
 	render.clear(lumiere.clear_options)
@@ -198,7 +200,7 @@ function M.draw(fn)
 	render.disable_texture(0)
 
 	render.set_stencil_mask(0xff)
-	render.clear({ [graphics.BUFFER_TYPE_STENCIL_BIT] = 0 })
+	render.clear({ [render.BUFFER_STENCIL_BIT] = 0 })
 end
 
 function M.on_message(message_id, message, sender)
