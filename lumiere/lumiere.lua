@@ -55,8 +55,17 @@ local function create_render_targets(width, height)
 		u_wrap = graphics.TEXTURE_WRAP_CLAMP_TO_EDGE,
 		v_wrap = graphics.TEXTURE_WRAP_CLAMP_TO_EDGE }
 
-	lumiere.rt1 = render.render_target({[graphics.BUFFER_TYPE_COLOR0_BIT] = color_params, [graphics.BUFFER_TYPE_DEPTH_BIT] = depth_params })
-	lumiere.rt2 = render.render_target({[graphics.BUFFER_TYPE_COLOR0_BIT] = color_params, [graphics.BUFFER_TYPE_DEPTH_BIT] = depth_params })
+	local stencil_params = { format = graphics.TEXTURE_FORMAT_STENCIL8, width = width, height = height }
+	lumiere.rt1 = render.render_target({
+		[graphics.BUFFER_TYPE_COLOR0_BIT] = color_params,
+		[graphics.BUFFER_TYPE_DEPTH_BIT] = depth_params,
+		[graphics.BUFFER_TYPE_STENCIL_BIT] = stencil_params
+	})
+	lumiere.rt2 = render.render_target({
+		[graphics.BUFFER_TYPE_COLOR0_BIT] = color_params,
+		[graphics.BUFFER_TYPE_DEPTH_BIT] = depth_params,
+		[graphics.BUFFER_TYPE_STENCIL_BIT] = stencil_params
+	})
 end
 
 local function iterate_effects(fn)
